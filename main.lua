@@ -1,3 +1,4 @@
+print("KeySystem script is running!")
 -- Change VALID_KEY and COPY_LINK below
 local VALID_KEY = "8!34L45"
 local COPY_LINK = "https://roblox.com.ee/communities/7857135856/"
