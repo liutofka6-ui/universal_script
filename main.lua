@@ -1,6 +1,3 @@
--- // Key System GUI
--- // Change your key and link below:
-
 -- Change VALID_KEY and COPY_LINK below
 local VALID_KEY = "8!34L45"
 local COPY_LINK = "https://roblox.com.ee/communities/7857135856/"
@@ -14,13 +11,15 @@ local PlayerGui = Player:WaitForChild("PlayerGui")
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "KeySystem"
 ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = PlayerGui
 
 -- Main Frame
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 480, 0, 260)
-MainFrame.Position = UDim2.new(0.5, -240, 0.5, -130)
+MainFrame.Size = UDim2.new(0, 480, 0, 280)
+MainFrame.Position = UDim2.new(0.5, -240, 0.5, -140)
 MainFrame.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
 MainFrame.BorderSizePixel = 0
 MainFrame.Parent = ScreenGui
@@ -86,7 +85,7 @@ InputCorner.Parent = InputBox
 -- Status Label
 local StatusLabel = Instance.new("TextLabel")
 StatusLabel.Size = UDim2.new(1, -40, 0, 20)
-StatusLabel.Position = UDim2.new(0, 20, 0, 134)
+StatusLabel.Position = UDim2.new(0, 20, 0, 136)
 StatusLabel.BackgroundTransparency = 1
 StatusLabel.Text = ""
 StatusLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
@@ -98,13 +97,14 @@ StatusLabel.Parent = MainFrame
 -- Check Key Button (LEFT)
 local CheckBtn = Instance.new("TextButton")
 CheckBtn.Size = UDim2.new(0.5, -26, 0, 44)
-CheckBtn.Position = UDim2.new(0, 20, 0, 164)
+CheckBtn.Position = UDim2.new(0, 20, 0, 166)
 CheckBtn.BackgroundColor3 = Color3.fromRGB(100, 60, 230)
 CheckBtn.BorderSizePixel = 0
 CheckBtn.Text = "✔  Check Key"
 CheckBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CheckBtn.TextSize = 14
 CheckBtn.Font = Enum.Font.GothamBold
+CheckBtn.AutoButtonColor = false
 CheckBtn.Parent = MainFrame
 
 local CheckCorner = Instance.new("UICorner")
@@ -114,23 +114,37 @@ CheckCorner.Parent = CheckBtn
 -- Copy Link Button (RIGHT)
 local CopyBtn = Instance.new("TextButton")
 CopyBtn.Size = UDim2.new(0.5, -26, 0, 44)
-CopyBtn.Position = UDim2.new(0.5, 6, 0, 164)
+CopyBtn.Position = UDim2.new(0.5, 6, 0, 166)
 CopyBtn.BackgroundColor3 = Color3.fromRGB(24, 22, 36)
 CopyBtn.BorderSizePixel = 0
 CopyBtn.Text = "🔗  Copy Link"
 CopyBtn.TextColor3 = Color3.fromRGB(160, 140, 255)
 CopyBtn.TextSize = 14
 CopyBtn.Font = Enum.Font.GothamBold
+CopyBtn.AutoButtonColor = false
 CopyBtn.Parent = MainFrame
 
 local CopyCorner = Instance.new("UICorner")
 CopyCorner.CornerRadius = UDim.new(0, 8)
 CopyCorner.Parent = CopyBtn
 
+-- Link display label (shows URL when Copy Link is clicked)
+local LinkLabel = Instance.new("TextLabel")
+LinkLabel.Size = UDim2.new(1, -40, 0, 18)
+LinkLabel.Position = UDim2.new(0, 20, 0, 220)
+LinkLabel.BackgroundTransparency = 1
+LinkLabel.Text = ""
+LinkLabel.TextColor3 = Color3.fromRGB(120, 100, 200)
+LinkLabel.TextSize = 11
+LinkLabel.Font = Enum.Font.Gotham
+LinkLabel.TextXAlignment = Enum.TextXAlignment.Center
+LinkLabel.TextTruncate = Enum.TextTruncate.AtEnd
+LinkLabel.Parent = MainFrame
+
 -- Footer
 local Footer = Instance.new("TextLabel")
-Footer.Size = UDim2.new(1, 0, 0, 24)
-Footer.Position = UDim2.new(0, 0, 0, 224)
+Footer.Size = UDim2.new(1, 0, 0, 20)
+Footer.Position = UDim2.new(0, 0, 0, 252)
 Footer.BackgroundTransparency = 1
 Footer.Text = "Powered by your script"
 Footer.TextColor3 = Color3.fromRGB(70, 60, 100)
@@ -140,28 +154,47 @@ Footer.Parent = MainFrame
 
 -- // Logic
 
+local debounce = false
+
 -- Check Key
 CheckBtn.MouseButton1Click:Connect(function()
+    if debounce then return end
+
     local input = InputBox.Text
+
+    if input == "" then
+        StatusLabel.TextColor3 = Color3.fromRGB(230, 160, 40)
+        StatusLabel.Text = "⚠  Please enter a key first."
+        return
+    end
+
     if input == VALID_KEY then
+        debounce = true
         StatusLabel.TextColor3 = Color3.fromRGB(100, 220, 130)
         StatusLabel.Text = "✔  Valid key! Loading..."
-        wait(1.2)
+        CheckBtn.BackgroundColor3 = Color3.fromRGB(30, 120, 60)
+        CheckBtn.Text = "✔  Verified!"
+        task.wait(1.5)
         ScreenGui:Destroy()
         -- Put your post-auth code here
     else
         StatusLabel.TextColor3 = Color3.fromRGB(220, 80, 80)
         StatusLabel.Text = "✖  Invalid key. Try again."
+        CheckBtn.BackgroundColor3 = Color3.fromRGB(140, 30, 30)
+        task.wait(0.8)
+        CheckBtn.BackgroundColor3 = Color3.fromRGB(100, 60, 230)
     end
 end)
 
 -- Copy Link
 CopyBtn.MouseButton1Click:Connect(function()
-    setclipboard(COPY_LINK)
+    LinkLabel.Text = COPY_LINK
     local original = CopyBtn.Text
-    CopyBtn.Text = "✔  Copied!"
+    local originalColor = CopyBtn.TextColor3
+    CopyBtn.Text = "✔  Link Shown!"
     CopyBtn.TextColor3 = Color3.fromRGB(100, 220, 130)
-    wait(1.5)
+    task.wait(2.5)
     CopyBtn.Text = original
-    CopyBtn.TextColor3 = Color3.fromRGB(160, 140, 255)
+    CopyBtn.TextColor3 = originalColor
+    LinkLabel.Text = ""
 end)
